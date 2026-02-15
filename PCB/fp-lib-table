@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "lib_pharmacy")(type "KiCad")(uri "${KIPRJMOD}/lib_pharmacy.pretty")(options "")(descr ""))
+)
