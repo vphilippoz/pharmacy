@@ -4,7 +4,7 @@ Minimal version to test the module.
 This code is a minimal version to test the module. It toggles the defined GPIOs and the corresponding LED color.
 */
 
-#include "module1.hpp"
+#include "peripherals.hpp"
 
 // Constants
 constexpr unsigned int SERIAL_BAUD_RATE = 115200;
