@@ -56,8 +56,8 @@ const std::vector<std::vector<std::vector<std::vector<uint16_t>>>> ANIMATIONS = 
     },
 };
 
-const std::vector<uint8_t> ANIMATION_SPEEDS = {
-    1e3,      // Animation 0: ON (static)
+const std::vector<uint16_t> ANIMATION_SPEEDS = {
+    1000,      // Animation 0: ON (static)
     500,    // Animation 1: Blink (500ms between frames)
     200,    // Animation 2: Random (200ms between frames)
 };
@@ -94,7 +94,7 @@ uint8_t get_animation_id(void) {
     return current_animation_id;
 }
 
-uint8_t get_animation_speed(void) {
+uint16_t get_animation_speed(void) {
     /**
      * @brief Get the speed of the current animation
      * @return The speed of the current animation
