@@ -12,7 +12,7 @@ uint8_t current_animation_speed = 0; // Added delay between frames [ms]
 /*
 Each annimation is made of 3 pannels (top, bottom, center) of 16x8 LEDs each. 
 One animation can have multiple frames, which are displayed one after the other.
-Physically, the center one is only 8x8, so the MSB is ignored.
+Physically, the center one is only 8x8, so the LSB is ignored.
 
 To access a specific LED, use the following syntax:
 uint16_t led_line_values = ANIMATIONS[animation_id][frame_id][panel_id][line_id] 
@@ -22,7 +22,7 @@ const std::vector<std::vector<std::vector<std::vector<uint16_t>>>> ANIMATIONS = 
         {   // Frame 0: All LEDs ON
             {0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF}, // Top panel
             {0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF}, // Bottom panel
-            {0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF}, // Center panel
+            {0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF}, // Center panel
         },
     },
     {   // Animation 1: Blink
@@ -34,7 +34,7 @@ const std::vector<std::vector<std::vector<std::vector<uint16_t>>>> ANIMATIONS = 
         {   // Frame 1: Blink on
             {0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF}, // Top panel
             {0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF}, // Bottom panel
-            {0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF}, // Center panel
+            {0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF}, // Center panel
         },
     },
     {   // Animation 2: Random
@@ -61,12 +61,36 @@ const std::vector<std::vector<std::vector<std::vector<uint16_t>>>> ANIMATIONS = 
             {0x3E0E, 0x2010, 0x3C20, 0x023C, 0x0222, 0x2222, 0x1C1C, 0x8080}, // Center panel
         },
     },
+    {   // Animation 4: Cross shrinking
+        {   // Frame 0: 
+            {0xFFFF, 0x8180, 0x8180, 0x8180, 0x8180, 0x8180, 0x8180, 0x81FF}, // Top panel
+            {0xFF81, 0x0181, 0x0181, 0x0181, 0x0181, 0x0181, 0x0181, 0xFFFF}, // Bottom panel
+            {0x8100, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x8100}, // Center panel
+        },
+        {   // Frame 1: 
+            {0x0000, 0x7E7F, 0x4240, 0x4240, 0x4240, 0x4240, 0x427F, 0x4200}, // Top panel
+            {0x0042, 0xFE42, 0x0242, 0x0242, 0x0242, 0x0242, 0xFE7E, 0x0000}, // Bottom panel
+            {0x4200, 0xC300, 0x0000, 0x0000, 0x0000, 0x0000, 0xC300, 0x4200}, // Center panel
+        },
+        {   // Frame 2: 
+            {0x0000, 0x0000, 0x3C3F, 0x2420, 0x2420, 0x243F, 0x2400, 0x2400}, // Top panel
+            {0x0024, 0x0024, 0xFC24, 0x0424, 0x0424, 0xFC3C, 0x0000, 0x0000}, // Bottom panel
+            {0x2400, 0x2400, 0xE700, 0x0000, 0x0000, 0xE700, 0x2400, 0x2400}, // Center panel
+        },
+        {   // Frame 3: 
+            {0x0000, 0x0000, 0x0000, 0x181F, 0x181F, 0x1800, 0x1800, 0x1800}, // Top panel
+            {0x0018, 0x0018, 0x0018, 0xF818, 0xF818, 0x0000, 0x0000, 0x0000}, // Bottom panel
+            {0x1800, 0x1800, 0x1800, 0xFF00, 0xFF00, 0x1800, 0x1800, 0x1800}, // Center panel
+        },
+    },
 };
 
 const std::vector<uint16_t> ANIMATION_SPEEDS = {
     1000,      // Animation 0: ON (static)
     500,    // Animation 1: Blink (500ms between frames)
     200,    // Animation 2: Random (200ms between frames)
+    1000,   // Animation 3: Digits (static)
+    200,    // Animation 4: Custom (200ms between frames)
 };
 
 void setup(bool verbose) {
