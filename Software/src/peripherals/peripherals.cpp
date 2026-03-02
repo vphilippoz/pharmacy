@@ -34,6 +34,9 @@ void setup(bool verbose) {
     matrix_top.begin(MATRIX_TOP_ADDR);
     matrix_bottom.begin(MATRIX_BOTTOM_ADDR);
     matrix_center.begin(MATRIX_CENTER_ADDR);
+    matrix_top.setDisplayState(true);
+    matrix_bottom.setDisplayState(true);
+    matrix_center.setDisplayState(true);
 
     if(VERBOSE) {Serial.println("Module initialized successfully");}
 }
