@@ -102,7 +102,7 @@ void print_frame(const std::vector<std::vector<uint16_t>>& frame) {
         // Padding
         Serial.print("                ");
         for (uint8_t j = 0; j < 8; j++) { 
-            if (frame[0][i] & 1<<(15-j)) { // MSB
+            if (frame[0][7-j] & 1<<(15-i)) { // MSB
                 Serial.print("O ");
             } else {
                 Serial.print(". ");
@@ -114,7 +114,7 @@ void print_frame(const std::vector<std::vector<uint16_t>>& frame) {
     for (uint8_t i = 0; i < 8; i++) { // 8 lines per panel
         // Left panel
         for (uint8_t j = 0; j < 8; j++) {
-            if (frame[0][i] & 1<<(7-j)) { // LSB
+            if (frame[1][7-j] & 1<<(15-i)) { // MSB
                 Serial.print("O ");
             } else {
                 Serial.print(". ");
@@ -122,7 +122,7 @@ void print_frame(const std::vector<std::vector<uint16_t>>& frame) {
         }
         // Centre panel
         for (uint8_t j = 0; j < 8; j++) {
-            if (frame[2][i] & 1<<(15-j)) { // MSB
+            if (frame[2][7-j] & 1<<(15-i)) { // MSB
                 Serial.print("O ");
             } else {
                 Serial.print(". ");
@@ -130,7 +130,7 @@ void print_frame(const std::vector<std::vector<uint16_t>>& frame) {
         }
         // Right panel
         for (uint8_t j = 0; j < 8; j++) {
-            if (frame[1][i] & 1<<(15-j)) { // MSB
+            if (frame[0][7-j] & 1<<(7-i)) { // LSB
                 Serial.print("O ");
             } else {
                 Serial.print(". ");
@@ -143,7 +143,7 @@ void print_frame(const std::vector<std::vector<uint16_t>>& frame) {
         // Padding
         Serial.print("                ");
         for (uint8_t j = 0; j < 8; j++) { 
-            if (frame[1][i] & 1<<(7-j)) { // LSB
+            if (frame[1][7-j] & 1<<(7-i)) { // LSB
                 Serial.print("O ");
             } else {
                 Serial.print(". ");
