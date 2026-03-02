@@ -3,18 +3,18 @@
 #include <Adafruit_GFX.h>
 #include "Adafruit_LEDBackpack.h"
 
+
+namespace peripherals {
+    
+// Global variables definition
+bool VERBOSE = false;
+volatile bool next_animation_required = false;
 Adafruit_8x16matrix matrix_top = Adafruit_8x16matrix();
 Adafruit_8x16matrix matrix_bottom = Adafruit_8x16matrix();
 Adafruit_8x16matrix matrix_center = Adafruit_8x16matrix();
 
-namespace peripherals {
-
-// Global variables definition
-// bool pumps_active[] = {false, false, false, false};
-// bool VERBOSE = false;
-
 // Private function declaration
-// void set_LED();
+void IRAM_ATTR next_btn_ISR();
 
 void setup(bool verbose) {
     /**
@@ -26,6 +26,9 @@ void setup(bool verbose) {
     // Initialize GPIOs
     pinMode(PIN_NEXT_BTN, INPUT);
     pinMode(PIN_BRIGHTNESS_POT, INPUT);
+
+    // Enable interrupt for the "Next" button (assuming it is active LOW)
+    attachInterrupt(digitalPinToInterrupt(PIN_NEXT_BTN), peripherals::next_btn_ISR, FALLING);
     
     // Initialize LED matrices
     matrix_top.begin(MATRIX_TOP_ADDR);
@@ -40,15 +43,33 @@ bool get_next_animation_required() {
      * @brief Check if the next animation frame is required
      * @return true if the next animation frame is required, false otherwise
     */
-    return true; // Placeholder, always return true for testing
+    noInterrupts(); // Disable interrupts to ensure atomic access to the volatile variable
+    bool required = next_animation_required;
+    next_animation_required = false; // Reset the flag
+    interrupts(); // Re-enable interrupts
+    return required;
 }
 
-uint16_t get_brightness() {
+uint8_t get_brightness() {
     /**
      * @brief Get the current brightness level
-     * @return The current brightness level (0-255)
+     * @return The current brightness level (0-15)
     */
-    return 128; // Placeholder, return a fixed brightness level for testing
+    return analogRead(PIN_BRIGHTNESS_POT) / POT2BRIGHTNESS_SCALE; 
+}
+
+void set_brightness(uint8_t brightness) {
+    /**
+     * @brief Set the brightness level for the LED matrices
+     * @param brightness The brightness level to be set (0-15)
+    */
+    // Ensure brightness is within the valid range
+    brightness = brightness > 15 ? 15 : brightness;
+    
+    // Set brightness for all matrices
+    matrix_top.setBrightness(brightness);
+    matrix_bottom.setBrightness(brightness);
+    matrix_center.setBrightness(brightness);
 }
 
 void set_frame(const std::vector<std::vector<uint16_t>>& frame) {
@@ -92,6 +113,14 @@ void print_frame(const std::vector<std::vector<uint16_t>>& frame) {
         }
     }
 }
+
+void IRAM_ATTR next_btn_ISR() {
+    /**
+     * @brief Interrupt Service Routine for the "Next" button
+    */
+    next_animation_required = true;
+}
+
 } // namespace peripherals
 
 
