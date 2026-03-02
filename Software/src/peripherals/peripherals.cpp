@@ -97,24 +97,61 @@ void print_frame(const std::vector<std::vector<uint16_t>>& frame) {
     */
     if(!VERBOSE) return; // Do nothing if not in verbose mode
 
-    // TODO: Arrange pannels as on the physical device (top, bottom, center) and print them accordingly
-    for (size_t i = 0; i < frame.size(); i++) {
-        Serial.print("Panel ");
-        Serial.print(i);
-        Serial.println(": ");
-        for (size_t j = 0; j < frame[i].size(); j++) {
-            // Print each bit of the uint16_t value as "O" for 1 and "." for 0
-            // using bitwise operations to check each bit
-            for (uint8_t k = 0; k < 16; k++) {
-                if (frame[i][j] & 1<<k) {
-                    Serial.print("O ");
-                } else {
-                    Serial.print(". ");
-                }
+    // Print top panel
+    for (uint8_t i = 0; i < 8; i++) { // 8 lines per panel
+        // Padding
+        Serial.print("                ");
+        for (uint8_t j = 0; j < 8; j++) { 
+            if (frame[0][i] & 1<<(15-j)) { // MSB
+                Serial.print("O ");
+            } else {
+                Serial.print(". ");
             }
-            Serial.println();
         }
+        Serial.println("                ");
     }
+    // Print middle panels
+    for (uint8_t i = 0; i < 8; i++) { // 8 lines per panel
+        // Left panel
+        for (uint8_t j = 0; j < 8; j++) {
+            if (frame[0][i] & 1<<(7-j)) { // LSB
+                Serial.print("O ");
+            } else {
+                Serial.print(". ");
+            }
+        }
+        // Centre panel
+        for (uint8_t j = 0; j < 8; j++) {
+            if (frame[2][i] & 1<<(15-j)) { // MSB
+                Serial.print("O ");
+            } else {
+                Serial.print(". ");
+            }
+        }
+        // Right panel
+        for (uint8_t j = 0; j < 8; j++) {
+            if (frame[1][i] & 1<<(15-j)) { // MSB
+                Serial.print("O ");
+            } else {
+                Serial.print(". ");
+            }
+        }
+        Serial.println();
+    }
+    // Print bottom panel
+    for (uint8_t i = 0; i < 8; i++) { // 8 lines per panel
+        // Padding
+        Serial.print("                ");
+        for (uint8_t j = 0; j < 8; j++) { 
+            if (frame[1][i] & 1<<(7-j)) { // LSB
+                Serial.print("O ");
+            } else {
+                Serial.print(". ");
+            }
+        }
+        Serial.println("                ");
+    }
+
 }
 
 void IRAM_ATTR next_btn_ISR() {
