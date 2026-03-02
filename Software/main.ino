@@ -6,7 +6,7 @@
 */
 
 #include "src\animation\animation.hpp"
-#include "src\module2\module2.hpp"
+#include "src\peripherals\peripherals.hpp"
 
 // Constants
 constexpr unsigned int SERIAL_BAUD_RATE = 115200;
@@ -19,9 +19,34 @@ void setup() {
     }
 
     // Initialize modules
+    peripherals::setup(DEBUG);
+    animation::setup(DEBUG);
 }
 
 void loop() {
-    // Main loop
-    pass;
+    static uint8_t current_animation_id = animation::get_next_animation_id(); // Default animation ID
+    static bool change_anim = false;
+    static uint8_t brightness = peripherals::get_brightness(); // Default brightness level (0-15)
+
+    // Get user inputs
+    change_anim = peripherals::get_next_animation_required();
+    uint8_t tmp_brightness = peripherals::get_brightness();
+
+    // Update brightness
+    if(tmp_brightness != brightness) {
+        brightness = tmp_brightness;
+        animation::set_brightness(brightness);
+    }
+
+    // Update animation if required
+    if(change_anim) {
+        current_animation_id = animation::get_next_animation_id();
+    }
+
+    // Display the next frame of the current animation
+    std::vector<std::vector<uint16_t>> frame = animation::get_next_frame();
+    peripherals::set_frame(frame);
+
+    // Delay according to the animation speed
+    delay(animation::get_animation_speed());
 }
