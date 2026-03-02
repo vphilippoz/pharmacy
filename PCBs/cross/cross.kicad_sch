@@ -3937,7 +3937,7 @@
 	)
 	(symbol
 		(lib_id "parts_library:KWM-30881APGB")
-		(at 69.85 55.88 0)
+		(at 95.25 121.92 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -3946,7 +3946,7 @@
 		(fields_autoplaced yes)
 		(uuid "0b86fd38-07fc-4543-a0bc-04430abc774d")
 		(property "Reference" "U6"
-			(at 85.09 55.2449 0)
+			(at 110.49 121.2849 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3955,7 +3955,7 @@
 			)
 		)
 		(property "Value" "LEDs_L"
-			(at 85.09 57.15 0)
+			(at 110.49 123.19 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3964,7 +3964,7 @@
 			)
 		)
 		(property "Footprint" "lib_pharmacy:KWM-30881"
-			(at 69.85 55.88 0)
+			(at 95.25 121.92 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3973,7 +3973,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 69.85 55.88 0)
+			(at 95.25 121.92 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3982,7 +3982,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 69.85 55.88 0)
+			(at 95.25 121.92 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4321,7 +4321,7 @@
 	)
 	(symbol
 		(lib_id "parts_library:KWM-30881APGB")
-		(at 95.25 121.92 0)
+		(at 69.85 55.88 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -4330,7 +4330,7 @@
 		(fields_autoplaced yes)
 		(uuid "4d9728e5-64f6-4a14-af49-1c01bcd43fb1")
 		(property "Reference" "U5"
-			(at 110.49 121.2849 0)
+			(at 85.09 55.2449 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4339,7 +4339,7 @@
 			)
 		)
 		(property "Value" "LEDs_R"
-			(at 110.49 123.19 0)
+			(at 85.09 57.15 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4348,7 +4348,7 @@
 			)
 		)
 		(property "Footprint" "lib_pharmacy:KWM-30881"
-			(at 95.25 121.92 0)
+			(at 69.85 55.88 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4357,7 +4357,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 95.25 121.92 0)
+			(at 69.85 55.88 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4366,7 +4366,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 95.25 121.92 0)
+			(at 69.85 55.88 0)
 			(effects
 				(font
 					(size 1.27 1.27)
