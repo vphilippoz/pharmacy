@@ -62,9 +62,6 @@ const std::vector<uint16_t> ANIMATION_SPEEDS = {
     200,    // Animation 2: Random (200ms between frames)
 };
 
-// Private function declaration
-// void set_LED();
-
 void setup(bool verbose) {
     /**
      * @brief Setup the module
@@ -72,26 +69,21 @@ void setup(bool verbose) {
     // Save verbose mode
     VERBOSE = verbose;
 
+    // Reset animation state
+    current_animation_id = 0;
+    current_frame_id = 0;
+    current_animation_speed = ANIMATION_SPEEDS[current_animation_id];
+
     if(VERBOSE) {Serial.println("Module initialized successfully");}
 }
 
-uint8_t select_animation(uint8_t animation_id) {
+void select_animation(uint8_t animation_id) {
     /**
      * @brief Select the animation to display
      * @param animation_id The id of the animation to display
-     * @return The speed of the animation
     */
     current_animation_id = animation_id % ANIMATIONS.size();
     current_frame_id = 0; // Reset frame id to 0 when selecting a new animation
-    return get_animation_speed();
-}
-
-uint8_t get_animation_id(void) {
-    /**
-     * @brief Get the id of the current animation
-     * @return The id of the current animation
-    */
-    return current_animation_id;
 }
 
 uint16_t get_animation_speed(void) {
@@ -102,12 +94,21 @@ uint16_t get_animation_speed(void) {
     return ANIMATION_SPEEDS[current_animation_id];
 }
 
+uint8_t get_next_animation_id(void) {
+    /**
+     * @brief Get the id of the next animation
+     * @return The id of the next animation
+    */
+    current_animation_id = (current_animation_id + 1) % ANIMATIONS.size();
+    return current_animation_id;
+}
+
 std::vector<std::vector<uint16_t>> get_next_frame(void) {
     /**
      * @brief Get the next frame to display
      * @return Next frame to display (vector of 3*8 uint16_t)
     */
-    current_frame_id = (current_frame_id + 1) % ANIMATIONS[current_animation_id].size(); // Increment frame id and wrap around if necessary
+    current_frame_id = (current_frame_id + 1) % ANIMATIONS[current_animation_id].size();
     return ANIMATIONS[current_animation_id][current_frame_id];
 }
 
