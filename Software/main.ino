@@ -35,7 +35,7 @@ void loop() {
     // Update brightness
     if(tmp_brightness != brightness) {
         brightness = tmp_brightness;
-        animation::set_brightness(brightness);
+        peripherals::set_brightness(brightness);
     }
 
     // Update animation if required
@@ -46,6 +46,7 @@ void loop() {
     // Display the next frame of the current animation
     std::vector<std::vector<uint16_t>> frame = animation::get_next_frame();
     peripherals::set_frame(frame);
+    peripherals::print_frame(frame); // Debug: print the frame to the serial monitor
 
     // Delay according to the animation speed
     delay(animation::get_animation_speed());
