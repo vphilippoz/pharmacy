@@ -26,9 +26,9 @@ void loop() {
     // Declare variables
     static uint8_t brightness = 0;
     static std::vector<std::vector<uint16_t>> frame = {
-        {0xFFFF, 0x0000, 0xFFFF, 0x0000, 0xFFFF, 0x0000, 0xFFFF, 0x0000}, // Top panel
-        {0x0000, 0xFFFF, 0x0000, 0xFFFF, 0x0000, 0xFFFF, 0x0000, 0xFFFF}, // Bottom panel
-        {0xAAAA, 0x5555, 0xAAAA, 0x5555, 0xAAAA, 0x5555, 0xAAAA, 0x5555}}; // Center panel
+        {0x0000, 0x7E7F, 0x4240, 0x4240, 0x4240, 0x4240, 0x427F, 0x4200}, // Top panel
+        {0x0042, 0xFE42, 0x0242, 0x0242, 0x0242, 0x0242, 0xFE7E, 0x0000}, // Bottom panel
+        {0x4200, 0xC300, 0x0000, 0x0000, 0x0000, 0x0000, 0xC300, 0x4200}}; // Center panel
     
     // Update the LED matrices
     peripherals::set_brightness(brightness);
@@ -41,7 +41,7 @@ void loop() {
         Serial.println(peripherals::get_brightness());
         Serial.print("Next animation required: ");
         Serial.println(peripherals::get_next_animation_required() ? "Yes" : "No");
-        // Serial.print("Current frame: ");
+        // Serial.println("Current frame: ");
         // peripherals::print_frame(frame);
     }
     
