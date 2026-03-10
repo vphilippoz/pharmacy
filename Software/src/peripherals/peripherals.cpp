@@ -31,9 +31,10 @@ void setup(bool verbose) {
     attachInterrupt(digitalPinToInterrupt(PIN_NEXT_BTN), peripherals::next_btn_ISR, FALLING);
     
     // Initialize LED matrices
-    matrix_top.begin(MATRIX_TOP_ADDR);
-    matrix_bottom.begin(MATRIX_BOTTOM_ADDR);
-    matrix_center.begin(MATRIX_CENTER_ADDR);
+    Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
+    matrix_top.begin(MATRIX_TOP_ADDR, &Wire);
+    matrix_bottom.begin(MATRIX_BOTTOM_ADDR, &Wire);
+    matrix_center.begin(MATRIX_CENTER_ADDR, &Wire);
     matrix_top.setDisplayState(true);
     matrix_bottom.setDisplayState(true);
     matrix_center.setDisplayState(true);
