@@ -1,5 +1,5 @@
 /*
-  main.ino - Example code for the Pharmacy cross project.
+  Software.ino - Main code for the Pharmacy cross project.
   Created by Vincent Philippoz.
 
   This code is made for the ESP32-C6 platform and is intended to be used with the custom PCBs.
