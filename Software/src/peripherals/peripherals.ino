@@ -26,13 +26,13 @@ void loop() {
     // Declare variables
     static uint8_t brightness = 0;
     static std::vector<std::vector<uint16_t>> frame = {
-        {0x081C, 0x1822, 0x0802, 0x080C, 0x0810, 0x0820, 0x1C3E, 0x8080}, // Top panel
-        {0x3E04, 0x020C, 0x0414, 0x0C24, 0x023E, 0x2204, 0x1C04, 0x8080}, // Bottom panel
-        {0x3E0E, 0x2010, 0x3C20, 0x023C, 0x0222, 0x2222, 0x1C1C, 0x8080}, // Center panel
+        {0x0000, 0x0000, 0x7E40, 0x087F, 0x0E42, 0x0004, 0x0000, 0x0000}, // Top panel
+        {0x0000, 0x0000, 0x2424, 0x542A, 0x5432, 0x5C24, 0x0000, 0x0000}, // Bottom panel
+        {0x0000, 0x0000, 0x006C, 0x0092, 0x0092, 0x0044, 0x0000, 0x0000}, // Center panel
     };
     
     // Update the LED matrices
-    peripherals::set_brightness(brightness);
+    peripherals::set_brightness(2);
     peripherals::set_frame(frame);
 
 
@@ -53,5 +53,5 @@ void loop() {
             frame[i][j] = ~frame[i][j]; // Invert the bits to create a new pattern
         }
     }
-    delay(500); // [ms]
+    delay(200); // [ms]
 }
