@@ -20,7 +20,7 @@ namespace peripherals {
     uint8_t get_brightness();
     void set_brightness(uint8_t brightness);
     void set_frame(const std::vector<std::vector<uint16_t>>& frame);
-    void print_frame(const std::vector<std::vector<uint16_t>>& frame);
+    // void print_frame(const std::vector<std::vector<uint16_t>>& frame); Not correctly implemented yet, needs to be adapted to the hardware 
 
 } // namespace peripherals
 

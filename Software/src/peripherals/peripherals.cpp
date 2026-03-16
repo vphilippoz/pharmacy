@@ -39,7 +39,7 @@ void setup(bool verbose) {
     matrix_bottom.setDisplayState(true);
     matrix_center.setDisplayState(true);
 
-    if(VERBOSE) {Serial.println("Module initialized successfully");}
+    if(VERBOSE) {Serial.println("Peripherals module initialized successfully");}
 }
 
 bool get_next_animation_required() {
@@ -91,69 +91,69 @@ void set_frame(const std::vector<std::vector<uint16_t>>& frame) {
     matrix_center.writeDisplay();
 }
 
-void print_frame(const std::vector<std::vector<uint16_t>>& frame) {
-    /**
-     * @brief Print the current frame to the serial monitor
-     * @param frame The frame to be printed, represented as a 3x8 vector of uint16_t values
-    */
-    if(!VERBOSE) return; // Do nothing if not in verbose mode
+// void print_frame(const std::vector<std::vector<uint16_t>>& frame) {
+//     /**
+//      * @brief Print the current frame to the serial monitor
+//      * @param frame The frame to be printed, represented as a 3x8 vector of uint16_t values
+//     */
+//     if(!VERBOSE) return; // Do nothing if not in verbose mode
 
-    // Print top panel
-    for (uint8_t i = 0; i < 8; i++) { // 8 lines per panel
-        // Padding
-        Serial.print("                ");
-        for (uint8_t j = 0; j < 8; j++) { 
-            if (frame[0][7-j] & 1<<(15-i)) { // MSB
-                Serial.print("O ");
-            } else {
-                Serial.print(". ");
-            }
-        }
-        Serial.println("                ");
-    }
-    // Print middle panels
-    for (uint8_t i = 0; i < 8; i++) { // 8 lines per panel
-        // Left panel
-        for (uint8_t j = 0; j < 8; j++) {
-            if (frame[1][7-j] & 1<<(15-i)) { // MSB
-                Serial.print("O ");
-            } else {
-                Serial.print(". ");
-            }
-        }
-        // Centre panel
-        for (uint8_t j = 0; j < 8; j++) {
-            if (frame[2][7-j] & 1<<(15-i)) { // MSB
-                Serial.print("O ");
-            } else {
-                Serial.print(". ");
-            }
-        }
-        // Right panel
-        for (uint8_t j = 0; j < 8; j++) {
-            if (frame[0][7-j] & 1<<(7-i)) { // LSB
-                Serial.print("O ");
-            } else {
-                Serial.print(". ");
-            }
-        }
-        Serial.println();
-    }
-    // Print bottom panel
-    for (uint8_t i = 0; i < 8; i++) { // 8 lines per panel
-        // Padding
-        Serial.print("                ");
-        for (uint8_t j = 0; j < 8; j++) { 
-            if (frame[1][7-j] & 1<<(7-i)) { // LSB
-                Serial.print("O ");
-            } else {
-                Serial.print(". ");
-            }
-        }
-        Serial.println("                ");
-    }
+//     // Print top panel
+//     for (uint8_t i = 0; i < 8; i++) { // 8 lines per panel
+//         // Padding
+//         Serial.print("                ");
+//         for (uint8_t j = 0; j < 8; j++) { 
+//             if (frame[0][7-j] & 1<<(15-i)) { // MSB
+//                 Serial.print("O ");
+//             } else {
+//                 Serial.print(". ");
+//             }
+//         }
+//         Serial.println("                ");
+//     }
+//     // Print middle panels
+//     for (uint8_t i = 0; i < 8; i++) { // 8 lines per panel
+//         // Left panel
+//         for (uint8_t j = 0; j < 8; j++) {
+//             if (frame[1][7-j] & 1<<(15-i)) { // MSB
+//                 Serial.print("O ");
+//             } else {
+//                 Serial.print(". ");
+//             }
+//         }
+//         // Centre panel
+//         for (uint8_t j = 0; j < 8; j++) {
+//             if (frame[2][7-j] & 1<<(15-i)) { // MSB
+//                 Serial.print("O ");
+//             } else {
+//                 Serial.print(". ");
+//             }
+//         }
+//         // Right panel
+//         for (uint8_t j = 0; j < 8; j++) {
+//             if (frame[0][7-j] & 1<<(7-i)) { // LSB
+//                 Serial.print("O ");
+//             } else {
+//                 Serial.print(". ");
+//             }
+//         }
+//         Serial.println();
+//     }
+//     // Print bottom panel
+//     for (uint8_t i = 0; i < 8; i++) { // 8 lines per panel
+//         // Padding
+//         Serial.print("                ");
+//         for (uint8_t j = 0; j < 8; j++) { 
+//             if (frame[1][7-j] & 1<<(7-i)) { // LSB
+//                 Serial.print("O ");
+//             } else {
+//                 Serial.print(". ");
+//             }
+//         }
+//         Serial.println("                ");
+//     }
 
-}
+// }
 
 void IRAM_ATTR next_btn_ISR() {
     /**
