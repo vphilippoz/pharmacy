@@ -15,9 +15,9 @@ namespace animation {
 
     // Function prototypes
     void setup(bool verbose);
-    void select_animation(uint8_t animation_id);
     uint16_t get_animation_speed(void);
-    uint8_t get_next_animation_id(void);
+    uint8_t get_animation_frame_count(void);
+    void select_next_animation(void);
     std::vector<std::vector<uint16_t>> get_next_frame(void);
 
 } // namespace animation

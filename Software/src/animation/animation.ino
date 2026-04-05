@@ -9,7 +9,6 @@ This code is a minimal version to test the module. It toggles the defined GPIOs 
 // Constants
 constexpr unsigned int SERIAL_BAUD_RATE = 115200;
 constexpr bool VERBOSE = true;
-uint8_t current_animation_id = 0; // ID of the current animation
 uint8_t frame_counter = 0; 
 
 
@@ -21,7 +20,6 @@ void setup() {
 
     // Setup the library
     animation::setup(VERBOSE);
-    animation::select_animation(current_animation_id);
     if(VERBOSE) {Serial.println("Setup complete");}
 }
 
@@ -49,8 +47,9 @@ void loop() {
     // After a few frames, switch to the next animation
     if(frame_counter >= 5) {
         current_animation_id++; // Increment animation id
-        animation::select_animation(current_animation_id);
+        animation::set_next_animation();
         frame_counter = 0; // Reset frame counter
     }
-    delay(animation::get_animation_speed()*5); // Wait for the animation speed duration
+    
+    delay(animation::get_animation_speed()/animation::get_animation_frame_count()); // Wait for the animation speed duration
 }

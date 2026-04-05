@@ -14,7 +14,7 @@ namespace peripherals {
     constexpr unsigned int MATRIX_CENTER_ADDR = 0x72; // I2C address for the center LED matrix
     constexpr unsigned int POT2BRIGHTNESS_SCALE = 256; // Scale factor to convert potentiometer value (0-1023) to brightness level (0-15)
     constexpr unsigned int POT2SPEED_SCALE = 8; // Scale factor to convert potentiometer value (0-1023) to speed in milliseconds
-    constexpr unsigned int DEBOUNCE_TIME = 200; // Debounce time for the button in milliseconds
+    constexpr unsigned int DEBOUNCE_TIME = 300; // Debounce time for the button in milliseconds
 
     // Function prototypes
     void setup(bool verbose);

@@ -108,15 +108,6 @@ void setup(bool verbose) {
     if(VERBOSE) {Serial.println("Animation module initialized successfully");}
 }
 
-void select_animation(uint8_t animation_id) {
-    /**
-     * @brief Select the animation to display
-     * @param animation_id The id of the animation to display
-    */
-    current_animation_id = animation_id % ANIMATIONS.size();
-    current_frame_id = 0; // Reset frame id to 0 when selecting a new animation
-}
-
 uint16_t get_animation_speed(void) {
     /**
      * @brief Get the speed of the current animation
@@ -125,13 +116,20 @@ uint16_t get_animation_speed(void) {
     return ANIMATION_SPEEDS[current_animation_id];
 }
 
-uint8_t get_next_animation_id(void) {
+uint8_t get_animation_frame_count(void) {
+    /**
+     * @brief Get the number of frames in the current animation
+     * @return The number of frames in the current animation
+    */
+    return ANIMATIONS[current_animation_id].size();
+}
+
+void select_next_animation(void) {
     /**
      * @brief Get the id of the next animation
      * @return The id of the next animation
     */
     current_animation_id = (current_animation_id + 1) % ANIMATIONS.size();
-    return current_animation_id;
 }
 
 std::vector<std::vector<uint16_t>> get_next_frame(void) {
