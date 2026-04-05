@@ -9,12 +9,16 @@ namespace peripherals {
 // Global variables definition
 bool VERBOSE = false;
 volatile bool next_animation_required = false;
+volatile unsigned long last_press_time = 0; // To implement debounce for the button
+uint8_t current_brightness = 512/POT2BRIGHTNESS_SCALE; // To keep track of the current brightness level
+uint16_t current_speed = 512/POT2SPEED_SCALE; // To keep track of the current animation speed
 Adafruit_8x16matrix matrix_top = Adafruit_8x16matrix();
 Adafruit_8x16matrix matrix_bottom = Adafruit_8x16matrix();
 Adafruit_8x16matrix matrix_center = Adafruit_8x16matrix();
 
 // Private function declaration
-void IRAM_ATTR next_btn_ISR();
+void IRAM_ATTR btn_press_ISR();
+bool get_button_state();
 
 void setup(bool verbose) {
     /**
@@ -25,11 +29,11 @@ void setup(bool verbose) {
 
     // Initialize GPIOs
     pinMode(PIN_NEXT_BTN, INPUT);
-    pinMode(PIN_BRIGHTNESS_POT, INPUT);
+    pinMode(PIN_SPEED_POT, INPUT);
 
-    // Enable interrupt for the "Next" button (assuming it is active LOW)
-    attachInterrupt(digitalPinToInterrupt(PIN_NEXT_BTN), peripherals::next_btn_ISR, FALLING);
-    
+    // Enable interrupt for the button (active HIGH)
+    attachInterrupt(digitalPinToInterrupt(PIN_NEXT_BTN), peripherals::btn_press_ISR, RISING);
+
     // Initialize LED matrices
     Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
     matrix_top.begin(MATRIX_TOP_ADDR, &Wire);
@@ -56,10 +60,24 @@ bool get_next_animation_required() {
 
 uint8_t get_brightness() {
     /**
-     * @brief Get the current brightness level
+     * @brief Get the current brightness level. Using the pot value only if the button is pressed.
      * @return The current brightness level (0-15)
     */
-    return analogRead(PIN_BRIGHTNESS_POT) / POT2BRIGHTNESS_SCALE; 
+    if (get_button_state() == true) {
+        current_brightness = analogRead(PIN_SPEED_POT) / POT2BRIGHTNESS_SCALE; 
+    }
+    return current_brightness;
+}
+
+uint16_t get_speed() {
+    /**
+     * @brief Get the current animation speed. Using the pot value only if the button is not pressed.
+     * @return The current animation speed in milliseconds
+    */
+    if (get_button_state() == false) {
+        current_speed = analogRead(PIN_SPEED_POT) / POT2SPEED_SCALE; 
+    }
+    return current_speed;
 }
 
 void set_brightness(uint8_t brightness) {
@@ -91,103 +109,23 @@ void set_frame(const std::vector<std::vector<uint16_t>>& frame) {
     matrix_center.writeDisplay();
 }
 
-// void print_frame(const std::vector<std::vector<uint16_t>>& frame) {
-//     /**
-//      * @brief Print the current frame to the serial monitor
-//      * @param frame The frame to be printed, represented as a 3x8 vector of uint16_t values
-//     */
-//     if(!VERBOSE) return; // Do nothing if not in verbose mode
-
-//     // Print top panel
-//     for (uint8_t i = 0; i < 8; i++) { // 8 lines per panel
-//         // Padding
-//         Serial.print("                ");
-//         for (uint8_t j = 0; j < 8; j++) { 
-//             if (frame[0][7-j] & 1<<(15-i)) { // MSB
-//                 Serial.print("O ");
-//             } else {
-//                 Serial.print(". ");
-//             }
-//         }
-//         Serial.println("                ");
-//     }
-//     // Print middle panels
-//     for (uint8_t i = 0; i < 8; i++) { // 8 lines per panel
-//         // Left panel
-//         for (uint8_t j = 0; j < 8; j++) {
-//             if (frame[1][7-j] & 1<<(15-i)) { // MSB
-//                 Serial.print("O ");
-//             } else {
-//                 Serial.print(". ");
-//             }
-//         }
-//         // Centre panel
-//         for (uint8_t j = 0; j < 8; j++) {
-//             if (frame[2][7-j] & 1<<(15-i)) { // MSB
-//                 Serial.print("O ");
-//             } else {
-//                 Serial.print(". ");
-//             }
-//         }
-//         // Right panel
-//         for (uint8_t j = 0; j < 8; j++) {
-//             if (frame[0][7-j] & 1<<(7-i)) { // LSB
-//                 Serial.print("O ");
-//             } else {
-//                 Serial.print(". ");
-//             }
-//         }
-//         Serial.println();
-//     }
-//     // Print bottom panel
-//     for (uint8_t i = 0; i < 8; i++) { // 8 lines per panel
-//         // Padding
-//         Serial.print("                ");
-//         for (uint8_t j = 0; j < 8; j++) { 
-//             if (frame[1][7-j] & 1<<(7-i)) { // LSB
-//                 Serial.print("O ");
-//             } else {
-//                 Serial.print(". ");
-//             }
-//         }
-//         Serial.println("                ");
-//     }
-
-// }
-
-void IRAM_ATTR next_btn_ISR() {
+void IRAM_ATTR btn_press_ISR() {
     /**
      * @brief Interrupt Service Routine for the "Next" button
     */
-    next_animation_required = true;
+    unsigned long now = millis();
+    if (now - last_press_time > DEBOUNCE_TIME) {
+        last_press_time = now;
+        next_animation_required = true;
+    }
+}
+
+bool get_button_state() {
+    /**
+     * @brief Get the current state of the button
+     * @return true if the button is currently pressed, false otherwise
+    */
+    return digitalRead(PIN_NEXT_BTN) == HIGH;
 }
 
 } // namespace peripherals
-
-
-/* Example of a frame
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-O O O O O O O O O O O O O O O O O O O O O O O O 
-O O O O O O O O O O O O O O O O O O O O O O O O 
-O O O O O O O O O O O O O O O O O O O O O O O O 
-O O O O O O O O O O O O O O O O O O O O O O O O 
-O O O O O O O O O O O O O O O O O O O O O O O O 
-O O O O O O O O O O O O O O O O O O O O O O O O 
-O O O O O O O O O O O O O O O O O O O O O O O O 
-O O O O O O O O O O O O O O O O O O O O O O O O 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-*/

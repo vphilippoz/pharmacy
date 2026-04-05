@@ -8,7 +8,7 @@ This code is a minimal version to test the module. It toggles the defined GPIOs 
 
 // Constants
 constexpr unsigned int SERIAL_BAUD_RATE = 115200;
-constexpr bool VERBOSE = true;
+constexpr bool VERBOSE = false;
 
 
 void setup() {
@@ -30,28 +30,42 @@ void loop() {
         {0x0000, 0x0000, 0x2424, 0x542A, 0x5432, 0x5C24, 0x0000, 0x0000}, // Bottom panel
         {0x0000, 0x0000, 0x006C, 0x0092, 0x0092, 0x0044, 0x0000, 0x0000}, // Center panel
     };
+    static bool change_anim = false;
+    static uint16_t speed = 200; // [ms]
     
-    // Update the LED matrices
-    peripherals::set_brightness(2);
-    peripherals::set_frame(frame);
+    // Get user inputs
+    change_anim = peripherals::get_next_animation_required();
+    uint8_t tmp_brightness = peripherals::get_brightness();
+    speed = peripherals::get_speed();
 
+    // Update brightness if it has changed
+    if(tmp_brightness != brightness) {
+        brightness = tmp_brightness;
+        peripherals::set_brightness(brightness);
+    }
+
+    // Update the LED matrices
+    peripherals::set_frame(frame);
 
     // Print infos
     if(VERBOSE) {
         Serial.print("Brightness: ");
-        Serial.println(peripherals::get_brightness());
+        Serial.println(tmp_brightness);
         Serial.print("Next animation required: ");
-        Serial.println(peripherals::get_next_animation_required() ? "Yes" : "No");
+        Serial.println(change_anim ? "Yes" : "No");
+        Serial.print("Animation speed: ");
+        Serial.println(speed);
         // Serial.println("Current frame: ");
         // peripherals::print_frame(frame);
     }
     
-    // Update
-    brightness = (brightness + 1) % 16; // Increment brightness level (0-15)
+    // Invert the frame for the next loop
     for (size_t i = 0; i < frame.size(); i++) {
         for (size_t j = 0; j < frame[i].size(); j++) {
             frame[i][j] = ~frame[i][j]; // Invert the bits to create a new pattern
         }
     }
-    delay(200); // [ms]
+
+    // Delay before the next update
+    delay(333 + speed); // [ms]
 }
