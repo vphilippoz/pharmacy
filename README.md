@@ -4,6 +4,8 @@ A miniature pharmacy cross display made of LED matrices.
 
 This is a fun project to build and decorate you home, or bring at a rave party! The software runs on a ESP32 and controls 5 square LED matrices.
 
+![til](./media/cross_animation.gif)
+
 # Features
 
 In its current version, the project has:
