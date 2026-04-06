@@ -55,8 +55,6 @@ void loop() {
         Serial.println(change_anim ? "Yes" : "No");
         Serial.print("Animation speed: ");
         Serial.println(speed);
-        // Serial.println("Current frame: ");
-        // peripherals::print_frame(frame);
     }
     
     // Invert the frame for the next loop
@@ -67,5 +65,5 @@ void loop() {
     }
 
     // Delay before the next update
-    delay(333 + speed); // [ms]
+    delay(speed); // [ms]
 }

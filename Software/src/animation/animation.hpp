@@ -9,9 +9,6 @@ namespace animation {
     constexpr uint8_t TOP = 0;         // Index for the top LED in the frame
     constexpr uint8_t BOTTOM = 1;      // Index for the bottom LED in the frame
     constexpr uint8_t CENTER = 2;      // Index for the center LED in the frame
-    constexpr uint8_t ANIM_ON = 0;          // Animation ID for the ON (static) animation
-    constexpr uint8_t ANIM_BLINK = 1;       // Animation ID for the blink animation
-    constexpr uint8_t ANIM_RANDOM = 2;      // Animation ID for the random animation
 
     // Function prototypes
     void setup(bool verbose);

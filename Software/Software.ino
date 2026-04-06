@@ -10,7 +10,7 @@
 
 // Constants
 constexpr unsigned int SERIAL_BAUD_RATE = 115200;
-constexpr bool DEBUG = true;
+constexpr bool DEBUG = false;
 
 void setup() {
     // Initialize serial communication
@@ -46,7 +46,7 @@ void loop() {
     
     // Display the next frame of the current animation if the required time has passed
     uint16_t now = millis();
-    uint16_t time_between_frames = (1000 - speed) / animation::get_animation_frame_count();
+    uint16_t time_between_frames = speed / animation::get_animation_frame_count();
     if (now - last_frame_change_time >= time_between_frames) {
         last_frame_change_time = now;
         std::vector<std::vector<uint16_t>> frame = animation::get_next_frame();
@@ -54,5 +54,5 @@ void loop() {
     }
 
     // Run loop at a reasonable speed
-    delay(50); // [ms]
+    delay(20); // [ms]
 }

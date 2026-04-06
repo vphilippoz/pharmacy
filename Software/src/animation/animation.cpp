@@ -130,6 +130,8 @@ void select_next_animation(void) {
      * @return The id of the next animation
     */
     current_animation_id = (current_animation_id + 1) % ANIMATIONS.size();
+    current_frame_id = 0;
+    current_animation_speed = ANIMATION_SPEEDS[current_animation_id];
 }
 
 std::vector<std::vector<uint16_t>> get_next_frame(void) {

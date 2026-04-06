@@ -12,8 +12,9 @@ namespace peripherals {
     constexpr unsigned int MATRIX_TOP_ADDR = 0x71;    // I2C address for the top LED matrix
     constexpr unsigned int MATRIX_BOTTOM_ADDR = 0x70; // I2C address for the bottom LED matrix
     constexpr unsigned int MATRIX_CENTER_ADDR = 0x72; // I2C address for the center LED matrix
-    constexpr unsigned int POT2BRIGHTNESS_SCALE = 256; // Scale factor to convert potentiometer value (0-1023) to brightness level (0-15)
-    constexpr unsigned int POT2SPEED_SCALE = 8; // Scale factor to convert potentiometer value (0-1023) to speed in milliseconds
+    constexpr unsigned int POT2BRIGHTNESS_SCALE = 256; // Scale factor to convert potentiometer value (0-4095) to brightness level (0-15)
+    constexpr unsigned int POT2SPEED_SCALE = 8; // Scale factor to convert potentiometer value (0-4095) to speed in milliseconds
+    constexpr unsigned int SPEED_OFFSET = 750; // Offset to add to the speed value to get a reasonable range of animation speeds (in milliseconds)
     constexpr unsigned int DEBOUNCE_TIME = 100; // Debounce time for the button in milliseconds
     constexpr unsigned int LONG_PRESS_TRESHOLD = 500; // Time threshold to differentiate between short and long button press in milliseconds
 
