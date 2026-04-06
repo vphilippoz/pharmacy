@@ -10,7 +10,7 @@ In its current version, the project has:
 
 - 5 animations
 - Button to switch between animations
-- Potentiometer to tune brightness
+- Potentiometer to tune brightness and animation speed
 - Excel file to easily create animation bitmap from a drawing (in excel file)
 
 Available animations are:
@@ -20,6 +20,10 @@ Available animations are:
 1. Random (White noise)
 1. Digits (indicating pannel index)
 1. Cross shrinking
+
+# Usage
+
+Plug the power connector. The device starts automatically. A short press on the button changes the animation. Turning the knob allows to tune the animation speed. One cycle is between 80 BPM and 250 BPM. When holding the button, the knob controlls the display brightness.
 
 # BOM
 
