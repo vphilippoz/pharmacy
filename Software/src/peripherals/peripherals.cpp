@@ -8,8 +8,10 @@ namespace peripherals {
     
 // Global variables definition
 bool VERBOSE = false;
-volatile bool next_animation_required = false;
-volatile unsigned long last_press_time = 0; // To implement debounce for the button
+volatile bool btn_state = false;
+volatile unsigned long last_btn_edge_time = 0; // To implement debounce for the button
+volatile bool btn_hold = false; // To keep track of whether the button is currently held
+volatile bool last_press_was_long = false; // To keep track of whether the last button press was a long press
 uint8_t current_brightness = 512/POT2BRIGHTNESS_SCALE; // To keep track of the current brightness level
 uint16_t current_speed = 512/POT2SPEED_SCALE; // To keep track of the current animation speed
 Adafruit_8x16matrix matrix_top = Adafruit_8x16matrix();
@@ -18,6 +20,7 @@ Adafruit_8x16matrix matrix_center = Adafruit_8x16matrix();
 
 // Private function declaration
 void IRAM_ATTR btn_press_ISR();
+void update_button_hold_state();
 bool get_button_state();
 
 void setup(bool verbose) {
@@ -51,11 +54,9 @@ bool get_next_animation_required() {
      * @brief Check if the next animation frame is required
      * @return true if the next animation frame is required, false otherwise
     */
-    noInterrupts(); // Disable interrupts to ensure atomic access to the volatile variable
-    bool required = next_animation_required;
-    next_animation_required = false; // Reset the flag
-    interrupts(); // Re-enable interrupts
-    return required;
+    update_button_hold_state();
+
+    return btn_state == false && last_press_was_long == false; 
 }
 
 uint8_t get_brightness() {
@@ -63,7 +64,9 @@ uint8_t get_brightness() {
      * @brief Get the current brightness level. Using the pot value only if the button is pressed.
      * @return The current brightness level (0-15)
     */
-    if (get_button_state() == true) {
+    update_button_hold_state();
+
+    if (btn_state == true && btn_hold == true) {
         current_brightness = analogRead(PIN_SPEED_POT) / POT2BRIGHTNESS_SCALE; 
     }
     return current_brightness;
@@ -74,7 +77,11 @@ uint16_t get_speed() {
      * @brief Get the current animation speed. Using the pot value only if the button is not pressed.
      * @return The current animation speed in milliseconds
     */
-    if (get_button_state() == false) {
+    update_button_hold_state();
+
+    Serial.println("Button state: " + String(btn_state) + ", Button hold: " + String(btn_hold) + ", Last press was long: " + String(last_press_was_long));
+
+    if (btn_state == false) {
         current_speed = analogRead(PIN_SPEED_POT) / POT2SPEED_SCALE; 
     }
     return current_speed;
@@ -114,10 +121,35 @@ void IRAM_ATTR btn_press_ISR() {
      * @brief Interrupt Service Routine for the "Next" button
     */
     unsigned long now = millis();
-    if (now - last_press_time > DEBOUNCE_TIME) {
-        last_press_time = now;
-        next_animation_required = true;
+    if (now - last_btn_edge_time > DEBOUNCE_TIME) {
+        last_btn_edge_time = now;
+        btn_state = !btn_state; // Toggle button state
+        if (btn_state == true) {
+            // Reset the long press tracking variables when the button is pressed again
+            last_press_was_long = false;
+        } else {
+            // If the button is released, check if it was a long press
+            if (btn_hold == true) {
+                last_press_was_long = true; // Mark the last press as a long press
+                btn_hold = false; // Reset the hold state
+            }
+        }
     }
+}
+
+void update_button_hold_state() {
+    /**
+     * @brief Update the button state based on the current time and the last edge time
+    */
+    unsigned long now = millis();
+
+    noInterrupts(); // Disable interrupts to ensure atomic access to the volatile variable
+    
+    if (btn_state == true && now - last_btn_edge_time > LONG_PRESS_TRESHOLD) {
+        btn_hold = true;
+    }
+
+    interrupts(); // Re-enable interrupts
 }
 
 bool get_button_state() {
@@ -125,7 +157,7 @@ bool get_button_state() {
      * @brief Get the current state of the button
      * @return true if the button is currently pressed, false otherwise
     */
-    return digitalRead(PIN_NEXT_BTN) == HIGH;
+    return btn_state;
 }
 
 } // namespace peripherals
