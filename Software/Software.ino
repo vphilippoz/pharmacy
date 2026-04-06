@@ -10,7 +10,7 @@
 
 // Constants
 constexpr unsigned int SERIAL_BAUD_RATE = 115200;
-constexpr bool DEBUG = true;
+constexpr bool DEBUG = false;
 
 void setup() {
     // Initialize serial communication
@@ -24,13 +24,14 @@ void setup() {
 }
 
 void loop() {
-    static uint8_t current_animation_id = animation::get_next_animation_id(); // Default animation ID
     static bool change_anim = false;
-    static uint8_t brightness = peripherals::get_brightness(); // Default brightness level (0-15)
+    static unsigned long last_frame_change_time = 0; 
+    static uint16_t speed = peripherals::get_speed();
+    static uint8_t brightness = peripherals::get_brightness();
 
     // Get user inputs
-    change_anim = peripherals::get_next_animation_required();
     uint8_t tmp_brightness = peripherals::get_brightness();
+    speed = peripherals::get_speed();
 
     // Update brightness
     if(tmp_brightness != brightness) {
@@ -39,14 +40,19 @@ void loop() {
     }
 
     // Update animation if required
-    if(change_anim) {
-        current_animation_id = animation::get_next_animation_id();
+    if(peripherals::get_next_animation_required()) {
+        animation::select_next_animation();
+    }
+    
+    // Display the next frame of the current animation if the required time has passed
+    uint16_t now = millis();
+    uint16_t time_between_frames = speed / animation::get_animation_frame_count();
+    if (now - last_frame_change_time >= time_between_frames) {
+        last_frame_change_time = now;
+        std::vector<std::vector<uint16_t>> frame = animation::get_next_frame();
+        peripherals::set_frame(frame);
     }
 
-    // Display the next frame of the current animation
-    std::vector<std::vector<uint16_t>> frame = animation::get_next_frame();
-    peripherals::set_frame(frame);
-
-    // Delay according to the animation speed
-    delay(animation::get_animation_speed());
+    // Run loop at a reasonable speed
+    delay(20); // [ms]
 }

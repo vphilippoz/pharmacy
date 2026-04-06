@@ -8,13 +8,19 @@ namespace peripherals {
     
 // Global variables definition
 bool VERBOSE = false;
-volatile bool next_animation_required = false;
+bool btn_state = false;
+unsigned long last_btn_change_time = 0; // To implement debounce for the button
+bool btn_hold = false; // To keep track of whether the button is currently held
+bool last_press_was_long = false; // To keep track of whether the last button press was a long press
+bool anim_change_required = false; // To indicate that an animation change is required on the next loop iteration
+uint8_t current_brightness = 512/POT2BRIGHTNESS_SCALE; // To keep track of the current brightness level
+uint16_t current_speed = 512/POT2SPEED_SCALE; // To keep track of the current animation speed
 Adafruit_8x16matrix matrix_top = Adafruit_8x16matrix();
 Adafruit_8x16matrix matrix_bottom = Adafruit_8x16matrix();
 Adafruit_8x16matrix matrix_center = Adafruit_8x16matrix();
 
 // Private function declaration
-void IRAM_ATTR next_btn_ISR();
+void update_button_state();
 
 void setup(bool verbose) {
     /**
@@ -25,11 +31,11 @@ void setup(bool verbose) {
 
     // Initialize GPIOs
     pinMode(PIN_NEXT_BTN, INPUT);
-    pinMode(PIN_BRIGHTNESS_POT, INPUT);
+    pinMode(PIN_SPEED_POT, INPUT);
 
-    // Enable interrupt for the "Next" button (assuming it is active LOW)
-    attachInterrupt(digitalPinToInterrupt(PIN_NEXT_BTN), peripherals::next_btn_ISR, FALLING);
-    
+    // // Enable interrupt for the button (active HIGH)
+    // attachInterrupt(digitalPinToInterrupt(PIN_NEXT_BTN), peripherals::btn_press_ISR, RISING);
+
     // Initialize LED matrices
     Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
     matrix_top.begin(MATRIX_TOP_ADDR, &Wire);
@@ -47,19 +53,40 @@ bool get_next_animation_required() {
      * @brief Check if the next animation frame is required
      * @return true if the next animation frame is required, false otherwise
     */
-    noInterrupts(); // Disable interrupts to ensure atomic access to the volatile variable
-    bool required = next_animation_required;
-    next_animation_required = false; // Reset the flag
-    interrupts(); // Re-enable interrupts
-    return required;
+    update_button_state();
+
+    if (anim_change_required) {
+        anim_change_required = false; // Reset the flag
+        return true; // Indicate that an animation change is required
+    } else {
+        return false; // No animation change required
+    }
 }
 
 uint8_t get_brightness() {
     /**
-     * @brief Get the current brightness level
+     * @brief Get the current brightness level. Using the pot value only if the button is pressed.
      * @return The current brightness level (0-15)
     */
-    return analogRead(PIN_BRIGHTNESS_POT) / POT2BRIGHTNESS_SCALE; 
+    update_button_state();
+
+    if (btn_state == true && btn_hold == true) {
+        current_brightness = analogRead(PIN_SPEED_POT) / POT2BRIGHTNESS_SCALE; 
+    }
+    return current_brightness;
+}
+
+uint16_t get_speed() {
+    /**
+     * @brief Get the current animation speed. Using the pot value only if the button is not pressed.
+     * @return The current animation speed in milliseconds
+    */
+    update_button_state();
+
+    if (btn_state == false) {
+        current_speed = SPEED_OFFSET - (analogRead(PIN_SPEED_POT) / POT2SPEED_SCALE); 
+    }
+    return current_speed;
 }
 
 void set_brightness(uint8_t brightness) {
@@ -91,103 +118,36 @@ void set_frame(const std::vector<std::vector<uint16_t>>& frame) {
     matrix_center.writeDisplay();
 }
 
-// void print_frame(const std::vector<std::vector<uint16_t>>& frame) {
-//     /**
-//      * @brief Print the current frame to the serial monitor
-//      * @param frame The frame to be printed, represented as a 3x8 vector of uint16_t values
-//     */
-//     if(!VERBOSE) return; // Do nothing if not in verbose mode
-
-//     // Print top panel
-//     for (uint8_t i = 0; i < 8; i++) { // 8 lines per panel
-//         // Padding
-//         Serial.print("                ");
-//         for (uint8_t j = 0; j < 8; j++) { 
-//             if (frame[0][7-j] & 1<<(15-i)) { // MSB
-//                 Serial.print("O ");
-//             } else {
-//                 Serial.print(". ");
-//             }
-//         }
-//         Serial.println("                ");
-//     }
-//     // Print middle panels
-//     for (uint8_t i = 0; i < 8; i++) { // 8 lines per panel
-//         // Left panel
-//         for (uint8_t j = 0; j < 8; j++) {
-//             if (frame[1][7-j] & 1<<(15-i)) { // MSB
-//                 Serial.print("O ");
-//             } else {
-//                 Serial.print(". ");
-//             }
-//         }
-//         // Centre panel
-//         for (uint8_t j = 0; j < 8; j++) {
-//             if (frame[2][7-j] & 1<<(15-i)) { // MSB
-//                 Serial.print("O ");
-//             } else {
-//                 Serial.print(". ");
-//             }
-//         }
-//         // Right panel
-//         for (uint8_t j = 0; j < 8; j++) {
-//             if (frame[0][7-j] & 1<<(7-i)) { // LSB
-//                 Serial.print("O ");
-//             } else {
-//                 Serial.print(". ");
-//             }
-//         }
-//         Serial.println();
-//     }
-//     // Print bottom panel
-//     for (uint8_t i = 0; i < 8; i++) { // 8 lines per panel
-//         // Padding
-//         Serial.print("                ");
-//         for (uint8_t j = 0; j < 8; j++) { 
-//             if (frame[1][7-j] & 1<<(7-i)) { // LSB
-//                 Serial.print("O ");
-//             } else {
-//                 Serial.print(". ");
-//             }
-//         }
-//         Serial.println("                ");
-//     }
-
-// }
-
-void IRAM_ATTR next_btn_ISR() {
+void update_button_state() {
     /**
-     * @brief Interrupt Service Routine for the "Next" button
+     * @brief Update the button state
     */
-    next_animation_required = true;
+    unsigned long now = millis();
+    bool measured_btn_state = digitalRead(PIN_NEXT_BTN) == HIGH;
+
+    // Check press/release with debounce
+    if (measured_btn_state != btn_state && now - last_btn_change_time > DEBOUNCE_TIME) {
+        last_btn_change_time = now;
+        btn_state = measured_btn_state;
+        if (btn_state == true) {
+            // Reset the long press tracking variable when the button is pressed again
+            last_press_was_long = false;
+        } else {
+            // Set the long press tracking variable when the button is released if necessary
+            if (btn_hold == true) {
+                last_press_was_long = true;
+                btn_hold = false;
+            } else {
+                anim_change_required = true; 
+            }
+        }
+    }
+
+    // Check for long press
+    if (btn_state == true && now - last_btn_change_time > LONG_PRESS_TRESHOLD) {
+        btn_hold = true;
+    }
 }
 
+
 } // namespace peripherals
-
-
-/* Example of a frame
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-O O O O O O O O O O O O O O O O O O O O O O O O 
-O O O O O O O O O O O O O O O O O O O O O O O O 
-O O O O O O O O O O O O O O O O O O O O O O O O 
-O O O O O O O O O O O O O O O O O O O O O O O O 
-O O O O O O O O O O O O O O O O O O O O O O O O 
-O O O O O O O O O O O O O O O O O O O O O O O O 
-O O O O O O O O O O O O O O O O O O O O O O O O 
-O O O O O O O O O O O O O O O O O O O O O O O O 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-. . . . . . . . O O O O O O O O . . . . . . . . 
-*/
