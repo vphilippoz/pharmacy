@@ -1,10 +1,17 @@
 # Pharmacy Cross Display
+<p align="left">
+    <a href="https://github.com/vphilippoz/pharmacy/releases/tag/v1.1" alt="Latest stable version">
+        <img src="https://img.shields.io/badge/version-1.1-blue" /></a>
+</p>
 
 A miniature pharmacy cross display made of LED matrices.
 
-This is a fun project to build and decorate you home, or bring at a rave party! The software runs on a ESP32 and controls 5 square LED matrices.
+<p align="center">
+    <img src="https://raw.githubusercontent.com/vphilippoz/pharmacy/master/media/cross_animation.gif"
+        height="300">
+</p>
 
-![til](./media/cross_animation.gif)
+This is a fun project to build and decorate you home, or bring at a rave party! The software runs on a ESP32 and controls 5 square LED matrices.
 
 # Features
 
