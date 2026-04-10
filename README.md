@@ -40,6 +40,11 @@ This list is not intended to be a shopping list. It enumerates everything needed
 
 ## Electronics
 
+<p align="center">
+    <img src="https://raw.githubusercontent.com/vphilippoz/pharmacy/master/media/elec_diagram.png"
+        height="200">
+</p>
+
 - 5V power supply
 - Custom-made PCBs (one of each)
 - ESP32-C6-DevKit
@@ -62,7 +67,7 @@ This list is not intended to be a shopping list. It enumerates everything needed
 ## Tools
 
 - 3D printer
-- Allen key
+- 2mm allen key
 - Soldering iron
 - Solder
 - Set of pliers
