@@ -91,7 +91,7 @@ def bitmapper(bitmap: np.ndarray) -> np.ndarray:
     
     return byte_dict
 
-def bitmap2txt(bitmaps: np.ndarray, out_path: str='./animation_library/new_animation.txt') -> None:
+def bitmap2txt(bitmaps: np.ndarray, out_path: str='./Software/animation_library/new_animation.txt') -> None:
     '''
     Export list of bitmaps to .txt file
     '''
@@ -99,7 +99,6 @@ def bitmap2txt(bitmaps: np.ndarray, out_path: str='./animation_library/new_anima
     text_output = '{\t//Animation X: name\n'
     for i, bitmap in enumerate(bitmaps):
         byte_dict = bitmapper(bitmap)
-        print(f"Bitmap {i} byte mapping: {byte_dict}")
         text_output += '\t{\t// Frame ' + f'{i}\n'
         for key in ["TR", "BL", "C"]:
             text_output += '\t\t{'
@@ -107,7 +106,6 @@ def bitmap2txt(bitmaps: np.ndarray, out_path: str='./animation_library/new_anima
             text_output += '},\n'
         text_output += '\t},\n'
     text_output += '}'
-    # print("Final text output:\n", text_output)
     
     # Create txt file and print the big string in it, save and exit
     with open(out_path, "w") as f:
@@ -139,9 +137,10 @@ if __name__ == "__main__":
             print("Testing image2bitmap ...")
             btmps = image2bitmap(imgs, threshold=0.5)
             print(f"Bitmap shape: {btmps.shape}, Bitmap dtype: {btmps.dtype}")
-            # print(f"Sample bitmap (first frame):\n{btmps[0].astype(int)}")
-
-            bitmap2txt(btmps)
+            
+            print("Testing bitmap2txt ...")
+            bitmap2txt(btmps, out_path=f"./Software/animation_library/{source.split('.')[0]}_animation.txt")
+            print(f"Bitmap exported to .txt file successfully at ./Software/animation_library/{source.split('.')[0]}_animation.txt\n")
 
     else:
         # Create args for CLI (path, threshold, loop_period_ms)
