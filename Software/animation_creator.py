@@ -4,6 +4,7 @@ import argparse
 import os
 
 CROSS_SIDE = 24
+MAX_IMG_COUNT = 15
 
 def open_images(path: str) -> np.ndarray:
     '''
@@ -28,6 +29,14 @@ def open_images(path: str) -> np.ndarray:
                 img = Image.open(img_path)
                 images.append(np.array(img))
     
+    # Ignore some images to avoid memory issues
+    if len(images) > MAX_IMG_COUNT:
+        images = images[:MAX_IMG_COUNT]
+        # step = len(images) // MAX_IMG_COUNT
+        # images = images[::step][:MAX_IMG_COUNT]
+        # print(f"Too many images, only keeping {len(images)} frames for processing")
+    
+    # Crop all images to the same size and store them in a np array
     img_side = min(min(img.shape[0] for img in images), min(img.shape[1] for img in images))
     np_images = np.zeros((len(images), img_side, img_side))
     for i, img in enumerate(images):
