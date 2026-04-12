@@ -1,5 +1,5 @@
 import numpy as np
-import PIL.Image as Image
+from PIL import Image, ImageDraw
 import argparse
 import os
 
@@ -91,12 +91,12 @@ def bitmapper(bitmap: np.ndarray) -> np.ndarray:
     
     return byte_dict
 
-def bitmap2txt(bitmaps: np.ndarray, out_path: str='./Software/animation_library/new_animation.txt') -> None:
+def bitmap2txt(bitmaps: np.ndarray, out_path: str='./Software/animation_library/new_animation.txt', name: str="name") -> None:
     '''
     Export list of bitmaps to .txt file
     '''
     # Create a big string with the correct format for C++ array initialization
-    text_output = '{\t//Animation X: name\n'
+    text_output = '{\t//Animation X: ' + f'{name}\n'
     for i, bitmap in enumerate(bitmaps):
         byte_dict = bitmapper(bitmap)
         text_output += '\t{\t// Frame ' + f'{i}\n'
@@ -112,21 +112,39 @@ def bitmap2txt(bitmaps: np.ndarray, out_path: str='./Software/animation_library/
         f.write(text_output)
 
 
-def bitmap2image(bitmaps: np.ndarray, loop_period_ms: float=1000.0) -> None:
+def bitmap2image(bitmaps: np.ndarray, loop_period_ms: float=1000.0, out_path: str='./Software/animation_library/new_animation.gif') -> None:
     '''
-    Create a gif rendering os the image sequence
+    Create a gif rendering of the image sequence
     '''
+    # Check if bitmaps have the correct shape
+    if bitmaps.shape[1:] != (CROSS_SIDE, CROSS_SIDE):
+        raise ValueError(f"Bitmaps must be of shape (N, {CROSS_SIDE}, {CROSS_SIDE}), but got {bitmaps.shape}")
+    
+    frames = []
+    frame0 = Image.new("RGB", (10*CROSS_SIDE, 10*CROSS_SIDE), color="gray")
 
-    # For each bitmap:
-    #   Create a colored image from bitmap
+    for i, bitmap in enumerate(bitmaps):
+        img = Image.new("RGB", (10*CROSS_SIDE, 10*CROSS_SIDE), color="gray")
+
+        # Draw cross background
+        draw = ImageDraw.Draw(img)
+        draw.rectangle([(0, 10*CROSS_SIDE/3), (10*CROSS_SIDE, 10*CROSS_SIDE*2/3)], outline="black", fill="black") # Black for inactive pixels
+        draw.rectangle([(10*CROSS_SIDE/3, 0), (10*CROSS_SIDE*2/3, 10*CROSS_SIDE)], outline="black", fill="black") # Black for inactive pixels
+        
+        # Draw active pixels in green
+        for j in range(CROSS_SIDE):
+            for k in range(CROSS_SIDE):
+                out_of_bounds = (j <= 7 and k <=7) or (j >= 16 and k >= 16) or (j <= 7 and k >= 16) or (j >= 16 and k <= 7)
+                if out_of_bounds: continue
+                if bitmap[j, k]: draw.ellipse([(10*k+2, 10*j+2), (10*k+8, 10*j+8)], outline=None, fill="green")
+        if i > 0: frames.append(img)
+        else: frame0 = img  # Use the first frame as the base for the gif
 
     # Export list of images as a gif
-
-
-    return None
+    frame0.save(out_path, save_all=True, append_images=frames, duration=loop_period_ms/bitmaps.shape[0], loop=0)
 
 if __name__ == "__main__":
-    tester = True
+    tester = False  # Set to True to run tests, False to use CLI
     if tester == True:
         # Test the functions
         for source in ["sample.gif"]:#, "samples/"]:
@@ -135,13 +153,16 @@ if __name__ == "__main__":
             print(f"Number of frames: {imgs.shape[0]}, Image shape: {imgs.shape[1:]}")
             
             print("Testing image2bitmap ...")
-            btmps = image2bitmap(imgs, threshold=0.5)
+            btmps = image2bitmap(imgs, threshold=0.2)
             print(f"Bitmap shape: {btmps.shape}, Bitmap dtype: {btmps.dtype}")
             
             print("Testing bitmap2txt ...")
             bitmap2txt(btmps, out_path=f"./Software/animation_library/{source.split('.')[0]}_animation.txt")
             print(f"Bitmap exported to .txt file successfully at ./Software/animation_library/{source.split('.')[0]}_animation.txt\n")
 
+            print("Testing bitmap2image ...")
+            bitmap2image(btmps, loop_period_ms=1000.0, out_path=f"./Software/animation_library/{source.split('.')[0]}_animation.gif")
+            print(f"Bitmap exported to .gif file successfully at ./Software/animation_library/{source.split('.')[0]}_animation.gif\n")
     else:
         # Create args for CLI (path, threshold, loop_period_ms)
         parser = argparse.ArgumentParser(description="Create an animation from a gif or a sequence of images")
@@ -150,19 +171,21 @@ if __name__ == "__main__":
         parser.add_argument("--loop_period_ms", type=float, default=1000.0, help="Loop period of the output animation in milliseconds")
         args = parser.parse_args()
         
-        path = args.path
-        thrsh = args.threshold
-        period = args.loop_period_ms
-        print(f"Process starts with Path={path}, Threshold={thrsh}, Loop period= {period} ms\n")
+        # Define input and output paths
+        in_path = str(args.path)
+        name = in_path.split('/')[-1].split('.')[0]
+        out_path_txt = f"./Software/animation_library/{name}_animation.txt"
+        out_path_gif = f"./Software/animation_library/{name}_animation.gif"
 
         # Process images
         print("Opening source images ...")
-        imgs = open_images(path)
+        imgs = open_images(in_path)
 
         print("Processing images ...")
-        btmps = image2bitmap(imgs, thrsh)
+        btmps = image2bitmap(imgs, args.threshold)
 
         # Export result
         print("Exporting bitmaps ...")
-        bitmap2txt(btmps)
-        bitmap2image(btmps, period)
+        bitmap2txt(btmps, out_path=out_path_txt, name=name)
+        bitmap2image(btmps, args.loop_period_ms, out_path=out_path_gif)
+        print(f"Animation exported successfully to {out_path_txt} and {out_path_gif}")
