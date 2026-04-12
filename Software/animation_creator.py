@@ -86,7 +86,7 @@ def bitmapper(bitmap: np.ndarray) -> np.ndarray:
         byte_dict["TR"].append(TR_bin_value)
 
         # Construct Bottom Left
-        bottom_col = bitmap[16:23, 15-i]
+        bottom_col = bitmap[16:24, 15-i]
         left_col = bitmap[8:16, 7-i]
         BL_cols = np.concatenate((left_col, bottom_col))
         BL_bin_value = np.sum([bit << i for i, bit in enumerate(BL_cols)])
