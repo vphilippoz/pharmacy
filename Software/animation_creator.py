@@ -57,23 +57,61 @@ def image2bitmap(images: np.ndarray, threshold: float) -> np.ndarray:
         # Apply thresholding on image to convert to bitmap
         bitmaps[i] = np.array(resized_img) > (threshold * 255)
     
-    # Return bitmap of image in a ndarray
     return bitmaps
+
+def bitmapper(bitmap: np.ndarray) -> np.ndarray:
+    '''
+    Convert bitmap to bytes using custom mapping
+    '''
+    if bitmap.shape != (CROSS_SIDE, CROSS_SIDE):
+        raise ValueError(f"Bitmap must be of shape {(CROSS_SIDE, CROSS_SIDE)}, but got {bitmap.shape}")
     
-def bitmap2txt(bitmaps: np.ndarray) -> None:
+    byte_dict = {"TR": [], "BL": [], "C": []}
+
+    for i in range(8):
+        # Construct Top Right
+        top_col = bitmap[0:8, 15-i]
+        right_col = bitmap[8:16, 23-i]
+        TR_cols = np.concatenate((top_col, right_col))
+        TR_bin_value = np.sum([bit << i for i, bit in enumerate(TR_cols)])
+        byte_dict["TR"].append(TR_bin_value)
+
+        # Construct Bottom Left
+        bottom_col = bitmap[16:23, 15-i]
+        left_col = bitmap[8:16, 7-i]
+        BL_cols = np.concatenate((left_col, bottom_col))
+        BL_bin_value = np.sum([bit << i for i, bit in enumerate(BL_cols)])
+        byte_dict["BL"].append(BL_bin_value)
+
+        # Construct Center
+        center_col = bitmap[8:16, 15-i]
+        C_cols = np.concatenate((center_col, center_col))  # Center is duplicated to fill 16 bits
+        C_bin_value = np.sum([bit << i for i, bit in enumerate(C_cols)])
+        byte_dict["C"].append(C_bin_value)
+    
+    return byte_dict
+
+def bitmap2txt(bitmaps: np.ndarray, out_path: str='./animation_library/new_animation.txt') -> None:
     '''
     Export list of bitmaps to .txt file
     '''
-    
-    # For each bitmap:
-    #   Convert bitmap to bytes using custom mapping
-    #   Create string from bytes
-
-    # Concatenate all strings in a JSON format
+    # Create a big string with the correct format for C++ array initialization
+    text_output = '{\t//Animation X: name\n'
+    for i, bitmap in enumerate(bitmaps):
+        byte_dict = bitmapper(bitmap)
+        print(f"Bitmap {i} byte mapping: {byte_dict}")
+        text_output += '\t{\t// Frame ' + f'{i}\n'
+        for key in ["TR", "BL", "C"]:
+            text_output += '\t\t{'
+            text_output += ', '.join(f"0x{byte:04x}" for byte in byte_dict[key])
+            text_output += '},\n'
+        text_output += '\t},\n'
+    text_output += '}'
+    # print("Final text output:\n", text_output)
     
     # Create txt file and print the big string in it, save and exit
-
-    return None
+    with open(out_path, "w") as f:
+        f.write(text_output)
 
 
 def bitmap2image(bitmaps: np.ndarray, loop_period_ms: float=1000.0) -> None:
@@ -93,7 +131,7 @@ if __name__ == "__main__":
     tester = True
     if tester == True:
         # Test the functions
-        for source in ["sample.gif", "samples/"]:
+        for source in ["sample.gif"]:#, "samples/"]:
             print(f"Testing open_images with {source} ...")
             imgs = open_images(f"./media/{source}")
             print(f"Number of frames: {imgs.shape[0]}, Image shape: {imgs.shape[1:]}")
@@ -101,7 +139,9 @@ if __name__ == "__main__":
             print("Testing image2bitmap ...")
             btmps = image2bitmap(imgs, threshold=0.5)
             print(f"Bitmap shape: {btmps.shape}, Bitmap dtype: {btmps.dtype}")
-            print(f"Sample bitmap (first frame):\n{btmps[0].astype(int)}")
+            # print(f"Sample bitmap (first frame):\n{btmps[0].astype(int)}")
+
+            bitmap2txt(btmps)
 
     else:
         # Create args for CLI (path, threshold, loop_period_ms)
