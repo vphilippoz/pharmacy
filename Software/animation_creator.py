@@ -3,6 +3,7 @@ import PIL.Image as Image
 import argparse
 import os
 
+CROSS_SIDE = 24
 
 def open_images(path: str) -> np.ndarray:
     '''
@@ -47,13 +48,17 @@ def image2bitmap(images: np.ndarray, threshold: float) -> np.ndarray:
     '''
     Convert images to bitmap representation
     '''
+    bitmaps = np.full((images.shape[0], CROSS_SIDE, CROSS_SIDE), False, dtype=bool)
 
-    # Reduce image resolution to final height width
+    for i, img in enumerate(images):
+        # Resize image to final height width
+        resized_img = Image.fromarray(img).resize((CROSS_SIDE, CROSS_SIDE), Image.ANTIALIAS)
 
-    # Apply thresholding on image to convert to bitmap
+        # Apply thresholding on image to convert to bitmap
+        bitmaps[i] = np.array(resized_img) > (threshold * 255)
     
     # Return bitmap of image in a ndarray
-    return
+    return bitmaps
     
 def bitmap2txt(bitmaps: np.ndarray) -> None:
     '''
@@ -92,6 +97,11 @@ if __name__ == "__main__":
             print(f"Testing open_images with {source} ...")
             imgs = open_images(f"./media/{source}")
             print(f"Number of frames: {imgs.shape[0]}, Image shape: {imgs.shape[1:]}")
+            
+            print("Testing image2bitmap ...")
+            btmps = image2bitmap(imgs, threshold=0.5)
+            print(f"Bitmap shape: {btmps.shape}, Bitmap dtype: {btmps.dtype}")
+            print(f"Sample bitmap (first frame):\n{btmps[0].astype(int)}")
 
     else:
         # Create args for CLI (path, threshold, loop_period_ms)
