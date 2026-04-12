@@ -17,9 +17,10 @@ This is a fun project to build and decorate you home, or bring at a rave party! 
 
 In its current version, the project has:
 
-- 5 animations
+- 8 animations
 - Button to switch between animations
 - Potentiometer to tune brightness and animation speed
+- Python script to easily create animation bitmap from a .gif file
 - Excel file to easily create animation bitmap from a drawing (in excel file)
 
 Available animations are:
@@ -27,8 +28,11 @@ Available animations are:
 1. Always ON
 1. Blink
 1. Random (White noise)
-1. Digits (indicating pannel index)
 1. Cross shrinking
+1. Girl dance
+1. Fortnite dance
+1. Spinning fish
+1. Spiral
 
 # Usage
 
